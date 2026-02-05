@@ -7,7 +7,7 @@ use Exception;
 
 class SshService
 {
-    private SSH2 $ssh;
+    private ?SSH2 $ssh = null;
     private string $host;
     private int $port;
     private string $username;
@@ -59,14 +59,31 @@ class SshService
             $this->connect();
         }
 
+        // If command uses sudo and we have a password, pipe it to sudo -S (non-interactive)
+        if (str_starts_with(trim($command), 'sudo ') && $this->password !== null && $this->password !== '') {
+            $command = $this->wrapSudo($command);
+        }
+
         $output = $this->ssh->exec($command);
         $exitStatus = $this->ssh->getExitStatus();
-        
+
+        // Close connection so next execute() opens a fresh channel (avoids "close the channel before opening again")
+        $this->ssh = null;
+
         return [
             'output' => $output,
             'exit_status' => $exitStatus,
             'success' => $exitStatus === 0
         ];
+    }
+
+    /**
+     * Wrap a sudo command so the password is piped via stdin (sudo -S).
+     */
+    private function wrapSudo(string $command): string
+    {
+        $escaped = str_replace(["'", "\n", "\r"], ["'\\''", ' ', ' '], $this->password);
+        return "echo '" . $escaped . "' | sudo -S -p '' " . substr($command, 5);
     }
 
     public function testConnection(): bool
@@ -92,10 +109,11 @@ class SshService
     public function installCertbot(): array
     {
         $commands = [
-            'sudo apt update',
-            'sudo snap install core; sudo snap refresh core',
-            'sudo snap install --classic certbot',
-            'sudo ln -sf /snap/bin/certbot /usr/bin/certbot || true'
+            'sudo apt update 2>&1',
+            'sudo snap install core 2>&1',
+            'sudo snap refresh core 2>&1',
+            'sudo snap install --classic certbot 2>&1',
+            'sudo ln -sf /snap/bin/certbot /usr/bin/certbot 2>&1 || true'
         ];
 
         $results = [];
@@ -135,15 +153,16 @@ class SshService
         string $webServerType,
         ?string $webrootPath = null
     ): array {
-        $domains = explode(',', $domain);
-        $domainFlags = implode(' -d ', array_map(function($d) {
-            return '-d ' . trim($d);
-        }, $domains));
+        // Build -d flags: "-d example.com -d www.example.com"
+        $domains = array_map('trim', explode(',', $domain));
+        $domainFlags = implode(' ', array_map(fn($d) => "-d $d", $domains));
         
-        $command = "sudo certbot --{$webServerType} {$domainFlags} --email {$email} --agree-tos --no-eff-email --redirect --non-interactive";
+        // Use certbot with apache/nginx plugin (auto-configures vhost and redirects)
+        $command = "sudo certbot --{$webServerType} {$domainFlags} --email {$email} --agree-tos --no-eff-email --redirect --non-interactive 2>&1";
         
+        // If webroot is specified, use certonly with webroot plugin (no auto-config)
         if ($webrootPath) {
-            $command = "sudo certbot certonly --webroot -w {$webrootPath} {$domainFlags} --email {$email} --agree-tos --no-eff-email --non-interactive";
+            $command = "sudo certbot certonly --webroot -w {$webrootPath} {$domainFlags} --email {$email} --agree-tos --no-eff-email --non-interactive 2>&1";
         }
 
         return $this->execute($command);
@@ -151,12 +170,12 @@ class SshService
 
     public function renewCertificate(): array
     {
-        return $this->execute('sudo certbot renew --non-interactive');
+        return $this->execute('sudo certbot renew --non-interactive 2>&1');
     }
 
     public function getCertificateInfo(string $domain): array
     {
-        $result = $this->execute("sudo certbot certificates | grep -A 10 '{$domain}'");
+        $result = $this->execute("sudo certbot certificates 2>&1 | grep -A 10 '{$domain}'");
         
         if (!$result['success']) {
             return ['error' => 'Failed to get certificate info'];
@@ -166,9 +185,9 @@ class SshService
         $info = [];
         $output = $result['output'];
         
-        // Extract expiration date
-        if (preg_match('/Expiry Date: (.+)/', $output, $matches)) {
-            $info['expires_at'] = $matches[1];
+        // Extract expiration date (certbot outputs e.g. "2026-05-01 15:00:45+00:00 (VALID: 89 days)")
+        if (preg_match('/Expiry Date: ([^(]+)/', $output, $matches)) {
+            $info['expires_at'] = trim($matches[1]);
         }
         
         // Extract certificate paths

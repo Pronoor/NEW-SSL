@@ -30,8 +30,8 @@ function Login() {
     setLoading(true)
 
     try {
-      await login(email, password)
-      navigate('/dashboard')
+      const data = await login(email, password)
+      navigate(data?.user?.is_admin ? '/admin' : '/dashboard')
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.')
     } finally {

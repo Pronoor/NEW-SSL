@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Certificate;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
@@ -13,12 +14,12 @@ class CertificateInstallationService
     public function install(Certificate $certificate): array
     {
         try {
-            // Decrypt credentials
+            // Decrypt credentials (stored with Crypt::encryptString)
             $password = $certificate->ssh_auth_type === 'password' 
-                ? decrypt($certificate->ssh_password) 
+                ? Crypt::decryptString($certificate->ssh_password) 
                 : null;
             $privateKey = $certificate->ssh_auth_type === 'key' 
-                ? decrypt($certificate->ssh_key) 
+                ? Crypt::decryptString($certificate->ssh_key) 
                 : null;
 
             // Initialize SSH connection
@@ -38,8 +39,11 @@ class CertificateInstallationService
             // Check/install Certbot
             if (!$this->sshService->isCertbotInstalled()) {
                 $installResult = $this->sshService->installCertbot();
-                if (!$installResult[count($installResult) - 1]['success']) {
-                    throw new Exception('Failed to install Certbot');
+                $last = $installResult[count($installResult) - 1];
+                if (!$last['success']) {
+                    $cmd = $last['command'] ?? 'unknown';
+                    $out = trim($last['output'] ?? '');
+                    throw new Exception("Failed to install Certbot. Command: {$cmd}. Output: " . ($out ?: '(none)'));
                 }
             }
 
@@ -106,12 +110,12 @@ class CertificateInstallationService
     public function renew(Certificate $certificate): array
     {
         try {
-            // Decrypt credentials
+            // Decrypt credentials (stored with Crypt::encryptString)
             $password = $certificate->ssh_auth_type === 'password' 
-                ? decrypt($certificate->ssh_password) 
+                ? Crypt::decryptString($certificate->ssh_password) 
                 : null;
             $privateKey = $certificate->ssh_auth_type === 'key' 
-                ? decrypt($certificate->ssh_key) 
+                ? Crypt::decryptString($certificate->ssh_key) 
                 : null;
 
             // Initialize SSH connection

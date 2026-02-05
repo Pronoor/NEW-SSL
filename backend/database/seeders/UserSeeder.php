@@ -14,14 +14,18 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // Create admin user
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
                 'name' => 'Admin User',
                 'password' => Hash::make('password123'),
                 'email_verified_at' => now(),
+                'is_admin' => true,
             ]
         );
+        if (!$admin->is_admin) {
+            $admin->update(['is_admin' => true]);
+        }
 
         // Create test user
         User::firstOrCreate(

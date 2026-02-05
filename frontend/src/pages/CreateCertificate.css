@@ -74,6 +74,51 @@
   flex-shrink: 0;
 }
 
+.info-callout {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  color: #1e40af;
+}
+
+.info-callout svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.info-callout strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #1e3a8a;
+}
+
+.info-callout p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: #1e40af;
+}
+
+.info-callout ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #1e40af;
+}
+
+.info-callout li {
+  margin-bottom: 0.5rem;
+}
+
+.info-callout li:last-child {
+  margin-bottom: 0;
+}
+
 .form-section {
   margin-bottom: 2.5rem;
   padding-bottom: 2rem;
@@ -152,6 +197,14 @@
 
 .form-input::placeholder {
   color: #a0aec0;
+}
+
+.form-hint {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.8125rem;
+  color: #718096;
+  line-height: 1.4;
+  max-width: 100%;
 }
 
 .textarea-input {
@@ -243,6 +296,210 @@
 .cancel-btn:hover {
   border-color: #cbd5e0;
   background: #f7fafc;
+}
+
+/* Certificate type: Standard / Wildcard */
+.cert-type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cert-type-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem 1rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.cert-type-option:hover {
+  border-color: #c7d2fe;
+  background: #f5f3ff;
+}
+
+.cert-type-option input {
+  margin: 0.2rem 0 0 0;
+  accent-color: #4f46e5;
+}
+
+.cert-type-option input:checked + span {
+  font-weight: 600;
+  color: #4f46e5;
+}
+
+.cert-type-option span {
+  font-size: 1rem;
+  color: #1a202c;
+}
+
+.cert-type-option small {
+  display: block;
+  width: 100%;
+  margin-left: 1.75rem;
+  font-size: 0.8125rem;
+  color: #718096;
+  font-weight: 400;
+}
+
+/* Subdomain list */
+.subdomain-input-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.subdomain-input-row .form-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-subdomain-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.add-subdomain-btn:hover {
+  background: #4338ca;
+}
+
+.subdomain-list {
+  list-style: none;
+  margin: 0.75rem 0 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.subdomain-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.subdomain-remove {
+  display: inline-flex;
+  padding: 0.15rem;
+  background: none;
+  border: none;
+  color: #6366f1;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.2s, background 0.2s;
+}
+
+.subdomain-remove:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+/* Wildcard callout */
+.wildcard-callout {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  color: #92400e;
+}
+
+.wildcard-callout svg {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.wildcard-callout strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #78350f;
+}
+
+.wildcard-callout p {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9375rem;
+}
+
+.wildcard-callout p:last-of-type {
+  margin-bottom: 0;
+}
+
+.wildcard-command-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 0.5rem;
+}
+
+.wildcard-command {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  padding: 1rem;
+  background: #1a202c;
+  color: #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-family: ui-monospace, monospace;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.copy-command-btn {
+  padding: 0.5rem 1rem;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.copy-command-btn:hover {
+  background: #4338ca;
+}
+
+.wildcard-note {
+  font-size: 0.8125rem;
+  color: #92400e;
+  margin-top: 0.5rem !important;
+}
+
+.wildcard-submit-note {
+  margin: 0 0 1rem 0;
+  padding: 1rem;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  color: #92400e;
+  font-size: 0.9375rem;
 }
 
 /* Responsive Design */

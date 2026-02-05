@@ -106,9 +106,15 @@ class CertificateController extends Controller
         ], 201);
     }
 
+    private function canAccessCertificate(Request $request, Certificate $certificate): bool
+    {
+        $user = $request->user();
+        return $certificate->user_id === $user->id || ($user->is_admin ?? false);
+    }
+
     public function show(Request $request, Certificate $certificate)
     {
-        if ($certificate->user_id !== $request->user()->id) {
+        if (!$this->canAccessCertificate($request, $certificate)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -121,7 +127,7 @@ class CertificateController extends Controller
 
     public function destroy(Request $request, Certificate $certificate)
     {
-        if ($certificate->user_id !== $request->user()->id) {
+        if (!$this->canAccessCertificate($request, $certificate)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -134,7 +140,7 @@ class CertificateController extends Controller
 
     public function renew(Request $request, Certificate $certificate)
     {
-        if ($certificate->user_id !== $request->user()->id) {
+        if (!$this->canAccessCertificate($request, $certificate)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -155,7 +161,7 @@ class CertificateController extends Controller
 
     public function toggleAutoRenew(Request $request, Certificate $certificate)
     {
-        if ($certificate->user_id !== $request->user()->id) {
+        if (!$this->canAccessCertificate($request, $certificate)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -170,7 +176,7 @@ class CertificateController extends Controller
 
     public function details(Request $request, Certificate $certificate)
     {
-        if ($certificate->user_id !== $request->user()->id) {
+        if (!$this->canAccessCertificate($request, $certificate)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

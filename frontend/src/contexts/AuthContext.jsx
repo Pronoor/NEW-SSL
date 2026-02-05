@@ -45,17 +45,39 @@ export function AuthProvider({ children }) {
     return response.data
   }
 
-  const register = async (name, email, password, password_confirmation) => {
-    const response = await api.post('/register', {
+  const register = async (name, email, password, password_confirmation, captchaId = null, captchaAnswer = null) => {
+    const payload = {
       name,
       email,
       password,
       password_confirmation,
-    })
+    }
+    if (captchaId && captchaAnswer) {
+      payload.captcha_id = captchaId
+      payload.captcha_answer = captchaAnswer
+    }
+    const response = await api.post('/register', payload)
+    if (response.data.requires_verification) {
+      return response.data
+    }
     const { token, user } = response.data
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
     setUser(user)
+    return response.data
+  }
+
+  const verifyEmail = async (email, otp) => {
+    const response = await api.post('/register/verify', { email, otp })
+    const { token, user } = response.data
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    setUser(user)
+    return response.data
+  }
+
+  const resendOtp = async (email) => {
+    const response = await api.post('/register/resend-otp', { email })
     return response.data
   }
 
@@ -76,6 +98,8 @@ export function AuthProvider({ children }) {
     loading,
     login,
     register,
+    verifyEmail,
+    resendOtp,
     logout,
   }
 

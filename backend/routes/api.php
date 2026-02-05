@@ -1,13 +1,18 @@
 <?php
 
+use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CaptchaController;
 use App\Http\Controllers\Api\CertificateController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
+Route::get('/captcha', [CaptchaController::class, 'show']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register/verify', [AuthController::class, 'registerVerify']);
+Route::post('/register/resend-otp', [AuthController::class, 'registerResendOtp']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Protected routes
@@ -31,4 +36,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+
+    // Admin (admin only)
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'index']);
+        Route::get('/users', [AdminController::class, 'users']);
+        Route::post('/users', [AdminController::class, 'store']);
+        Route::put('/users/{user}', [AdminController::class, 'update']);
+        Route::delete('/users/{user}', [AdminController::class, 'destroy']);
+        Route::get('/certificates', [AdminController::class, 'certificates']);
+    });
 });
